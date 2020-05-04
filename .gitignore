@@ -1,3 +1,7 @@
 
 /btn-debug/
 /btn-release/
+/bin-debug
+/bin-release
+/libs
+/scripts
