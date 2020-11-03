@@ -24,5 +24,15 @@
     {
       "name": "promise"
     }
-  ]
+  ],
+  "targets": {
+    "android": {
+      "appname": "方块传递",
+      "packagename": "com.companyname"
+    },
+    "ios": {
+      "appname": "方块传递",
+      "packagename": "net.yzjlb.rectgame"
+    }
+  }
 }
