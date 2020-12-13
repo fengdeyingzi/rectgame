@@ -28,6 +28,17 @@
                 "publish"
             ],
             "problemMatcher": "$tsc"
+        },
+         {
+            "taskName": "run",
+            "showOutput": "always",
+            "command": "egret",
+            "args": [
+                "run"
+            ],
+            "options": {
+                
+            }
         }
     ]
 }
