@@ -1,6 +1,6 @@
+// import { DisplayObjectContainer } from 'egret';
 
-class Game extends egret.DisplayObjectContainer {
-
+class GameStage extends egret.DisplayObjectContainer implements OnUpdateListener{
     // var spr_hero:egret.Sprite;
     list_background: egret.Bitmap[] = new Array<egret.Bitmap>();
     list_board: BoardSprite[] = new Array<BoardSprite>();
@@ -9,14 +9,25 @@ class Game extends egret.DisplayObjectContainer {
     infoText: egret.TextField = new egret.TextField();
     //游戏状态 -1 未运行 0 未开始 1 已开始 2 暂停 3 结束
     gameState: number = -1;
-    logoSprite:LogoSprite = new LogoSprite();
+    
+    stageWidth:number = 0
+    stageHeight:number
 
-
-    public constructor() {
+    public constructor(stageWidth:number, stageHeight:number) {
         super();
+        this.stageWidth = stageWidth;
+        this.stageHeight = stageHeight;
         this.addEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
+    }
 
-
+    onAddToStage(){
+        // this.removeEventListener(egret.Event.ADDED_TO_STAGE, this.onAddToStage, this);
+        console.log("onAddToStage","GameStage");
+        this.addImage();
+        
+        this.stage.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onTouchDown, this);
+        this.stage.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onTouchMove, this);
+        this.stage.addEventListener(egret.TouchEvent.TOUCH_END, this.onTouchUp, this);
     }
 
     onTouchDown(event: egret.TouchEvent) {
@@ -40,6 +51,7 @@ class Game extends egret.DisplayObjectContainer {
 
         if (this.gameState == 3) {
             this.setGameState(0);
+            // Main.nextState(new LogoStage(this.stage.stageWidth, this.stage.stageHeight));
         }
 
         if (this.gameState == 1) {
@@ -62,90 +74,49 @@ class Game extends egret.DisplayObjectContainer {
 
     }
 
-
-    private async loadResource() {
-        try {
-            const loadingView = new LoadingUI();
-            this.stage.addChild(loadingView);
-            await RES.loadConfig("resource/default.res.json", "resource/");
-            await RES.loadGroup("game1", 0, loadingView);
-            this.stage.removeChild(loadingView);
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-
-
-    private async onAddToStage(event: egret.Event) {
+    onUpdate(){
+        // console.log("onUpdate");
         
-        
-        this.stage.addEventListener(egret.TouchEvent.TOUCH_BEGIN, this.onTouchDown, this);
-        this.stage.addEventListener(egret.TouchEvent.TOUCH_MOVE, this.onTouchMove, this);
-        this.stage.addEventListener(egret.TouchEvent.TOUCH_END, this.onTouchUp, this);
-        this.stage.orientation = egret.OrientationMode.AUTO;
-        RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE, this.addImage, this);
-        await this.loadResource();
-        // await RES.loadConfig("resource/default.res.json","resource/");
-        // console.log("开始加载资源组");
-        // await RES.loadGroup("game1");
-        egret.lifecycle.addLifecycleListener((context) => {
-            context.onUpdate = () => {
-                // console.log("onUpdate");
-                this.logoSprite.logoc(this.stage);
-                if (this.list_background != null && this.gameState != -1) {
-                    if (this.list_background[0].y == this.list_background[1].y) {
-                        this.list_background[1].y += this.stage.stageHeight;
-                    }
-                    for (var i: number = 0; i < this.list_background.length; i++) {
-                        // console.log(""+i + " "+this.list_background[i].y);
-                        this.list_background[i].y += 1;
-                        if (this.list_background[i].y > this.stage.stageHeight) {
-                            for (var j = 0; j < this.list_background.length; j++) {
-                                this.list_background[j].y -= this.stage.stageHeight;
-                            }
-
-                        }
+        if (this.list_background != null && this.gameState != -1) {
+            if (this.list_background[0].y == this.list_background[1].y) {
+                this.list_background[1].y += this.stage.stageHeight;
+            }
+            for (var i: number = 0; i < this.list_background.length; i++) {
+                // console.log(""+i + " "+this.list_background[i].y);
+                this.list_background[i].y += 1;
+                if (this.list_background[i].y > this.stage.stageHeight) {
+                    for (var j = 0; j < this.list_background.length; j++) {
+                        this.list_background[j].y -= this.stage.stageHeight;
                     }
 
-                    this.hero.logoc();
-
-                    for (var n = 0; n < this.list_board.length; n++) {
-                        this.list_board[n].logoc(this.stage);
-                    }
-                    //判断死亡
-                    if (this.hero.y < 0 && this.gameState!=3) {
-                        this.setGameState(3);
-
-                    }
-                    //判断板子是否接住方块
-                    for (var nn = 0; nn < this.list_board.length; nn++) {
-                        if (!this.list_board[nn].isSleep() && this.list_board[nn].getSprite()==null) {
-                            if (this.list_board[nn].hitTestPoint(this.hero.getCenterX(), this.hero.getCenterY())) {
-                                this.list_board[nn].addSprite(this.hero);
-                                this.hero.detach(false);
-                                console.log("接住方块");
-                                
-                            }
-                        }
-                    }
-
-                    this.cameraRun();
                 }
             }
-        });
 
-        egret.lifecycle.onPause = () => {
-            console.log("onPause");
+            this.hero.logoc();
+
+            for (var n = 0; n < this.list_board.length; n++) {
+                this.list_board[n].logoc(this.stage);
+            }
+            //判断死亡
+            if (this.hero.y < 0 && this.gameState!=3) {
+                this.setGameState(3);
+
+            }
+            //判断板子是否接住方块
+            for (var nn = 0; nn < this.list_board.length; nn++) {
+                if (!this.list_board[nn].isSleep() && this.list_board[nn].getSprite()==null) {
+                    if (this.list_board[nn].hitTestPoint(this.hero.getCenterX(), this.hero.getCenterY())) {
+                        this.list_board[nn].addSprite(this.hero);
+                        this.hero.detach(false);
+                        console.log("接住方块");
+                        
+                        
+                    }
+                }
+            }
+
+            this.cameraRun();
         }
-
-        egret.lifecycle.onResume = () => {
-            console.log("onResume");
-        }
-
-
-
-
     }
 
     //设置游戏状态
@@ -153,13 +124,13 @@ class Game extends egret.DisplayObjectContainer {
         this.gameState = state;
         console.log("切换游戏状态："+state);
         if (this.gameState == 0) {
-            this.infoText.text = "点击屏幕\n将方块投进目标位置";
+            this.infoText.text = "点击屏幕\n将方块投进目标位置...";
             if (this.getChildByName("info_text") == null) {
                 this.addChild(this.infoText);
             }
             for(var i=0;i<this.list_board.length;i++){
                 this.list_board[i].init();
-                this.list_board[i].x = (this.stage.stageWidth-this.list_board[i].width)/2;
+                this.list_board[i].x = (this.stageWidth-this.list_board[i].width)/2;
                 this.list_board[i].y = i*400+480;
                 
                 console.log("初始化方块：",i*400+480)
@@ -169,6 +140,8 @@ class Game extends egret.DisplayObjectContainer {
                     
                 }
             }
+            
+            
         }
         if (this.gameState == 1) {
             if (this.getChildByName("info_text") != null) {
@@ -217,23 +190,23 @@ private refBoard(){
 
     private addImage() {
         console.log("addImage");
-        // alert("舞台宽高："+this.stage.stageWidth);
+        // alert("舞台宽高："+this.stageWidth);
         var background1: egret.Bitmap = this.createBitmapByName("background1");
-        background1.width = this.stage.stageWidth;
-        background1.height = this.stage.stageHeight;
+        background1.width = this.stageWidth;
+        background1.height = this.stageHeight;
         this.addChild(background1);
 
 
         var background2: egret.Bitmap = this.createBitmapByName("background1");
         background2.x = 0;
-        background2.y = this.stage.stageHeight;
-        background2.width = this.stage.stageWidth;
-        background2.height = this.stage.stageHeight;
+        background2.y = this.stageHeight;
+        background2.width = this.stageWidth;
+        background2.height = this.stageHeight;
         this.addChild(background2);
         this.list_background.push(background1);
         this.list_background.push(background2);
         background1.y = 0;
-        background2.y = this.stage.stageHeight;
+        background2.y = this.stageHeight;
 
 
 
@@ -262,11 +235,11 @@ private refBoard(){
         this.hero = hero;
         this.addChild(this.hero);
         //初始化坐标
-        board1.x = (this.stage.stageWidth - board1.width) / 2;
-        board2.x = (this.stage.stageWidth - board2.width) / 2;
-        board3.x = (this.stage.stageWidth - board3.width) / 2;
-        hero.x = (this.stage.stageWidth - hero.width) / 2;
-        hero.y = this.stage.stageHeight * 4 / 5;
+        board1.x = (this.stageWidth - board1.width) / 2;
+        board2.x = (this.stageWidth - board2.width) / 2;
+        board3.x = (this.stageWidth - board3.width) / 2;
+        hero.x = (this.stageWidth - hero.width) / 2;
+        hero.y = this.stageHeight * 4 / 5;
         // board2.y = hero.y;
         board2.addSprite(hero);
         board1.y = hero.y - 400;
@@ -278,27 +251,26 @@ private refBoard(){
         board2.setSleep(false);
         board3.setSleep(false);
         this.infoText.x = 0;
-        this.infoText.width = this.stage.stageWidth;
+        
+        this.infoText.width = this.stageWidth;
         this.infoText.height = 280;
-        this.infoText.y = this.stage.stageHeight / 2;
+        this.infoText.y = this.stageHeight / 2;
         this.infoText.textAlign = egret.HorizontalAlign.CENTER;
+        this.infoText.lineSpacing = 20;
         this.infoText.text = "点击屏幕\n将方块投进目标位置";
+        
         this.infoText.textColor = 0xffffff;
         this.infoText.name = "info_text";
+        
+        
         this.addChild(this.infoText);
         this.setGameState(0);
-        this.logoSprite = new LogoSprite();
-        this.logoSprite.init(this.stage);
-        this.addChild(this.logoSprite);
-        this.logoSprite.setOnClose(()=>{
-            this.onLogoClose();
-        });
+        
+       
 
     }
 
-    private onLogoClose(){
-        this.removeChild(this.logoSprite);
-    }
+    
 
     //模拟相机移动
     private cameraRun() {
@@ -311,12 +283,13 @@ private refBoard(){
                 break;
             }
         }
+        egret.startTick
         if(this.hero.y < 800) isOut = true;
         if (!this.hero.isDetach() && isOut) {
             this.hero.y += v;
             for (var i = 0; i < this.list_board.length; i++) {
                 this.list_board[i].y += v;
-                if(this.list_board[i].y > this.stage.stageHeight){
+                if(this.list_board[i].y > this.stageHeight){
                     //刷新板子
                 this.refBoard();
                 }
@@ -324,5 +297,6 @@ private refBoard(){
         }
 
     }
+
 
 }

@@ -24,6 +24,7 @@ class LogoSprite extends egret.Sprite {
         this.addChild(this.logo);
         this.alpha = 1;
         this.logo.alpha = 0;
+
     }
 
     public logoc(stage: egret.Stage) {

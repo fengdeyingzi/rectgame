@@ -9,13 +9,15 @@
 		"libs/modules/promise/promise.js"
 	],
 	"game": [
-		"bin-debug/Game.js",
 		"bin-debug/LoadingUI.js",
 		"bin-debug/Main.js",
 		"bin-debug/Platform.js",
 		"bin-debug/Test.js",
 		"bin-debug/sprite/BoardSprite.js",
 		"bin-debug/sprite/HeroSprite.js",
-		"bin-debug/sprite/LogoSprite.js"
+		"bin-debug/sprite/LogoSprite.js",
+		"bin-debug/stage/GameStage.js",
+		"bin-debug/stage/LogoStage.js",
+		"bin-debug/ui/OnUpdateListener.js"
 	]
 }

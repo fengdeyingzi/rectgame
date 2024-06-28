@@ -24,6 +24,6 @@
 			"preLaunchTask":"build",
 			"userDataDir":"${tmpdir}",
 			"port":5328
-		}s
+		}
 	]
 }

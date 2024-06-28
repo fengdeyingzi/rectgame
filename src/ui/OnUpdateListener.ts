@@ -1,0 +1,5 @@
+
+
+interface OnUpdateListener {
+    onUpdate(): void;
+  }
